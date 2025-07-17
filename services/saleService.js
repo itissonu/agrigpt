@@ -1,22 +1,20 @@
-const Sale = require('../models/sales.js');
-const logger = require('../logger');
+const Sale = require('../models/Sale');
+const { logger } = require('../logger');
 
-// Create
-const createSale = async (saleData) => {
+const createSale = async (userId, saleData) => {
   try {
-    const sale = await Sale.create(saleData);
-    logger.info(`Created sale for vegetable: ${saleData.vegetable}`);
+    const sale = await Sale.create({ userId, ...saleData });
+    logger.info('Saved sale to MongoDB', { saleId: sale._id, vegetable: saleData.vegetable, userId });
     return sale;
   } catch (error) {
-    logger.error(`Failed to create sale: ${error.message}`, { error });
+    logger.error('Failed to save sale', { error: error.message, stack: error.stack, saleData, userId });
     throw error;
   }
 };
 
-// Read
-const getSales = async ({ filterMonth = 'all', filterVegetable = 'all', limit = 10, skip = 0 }) => {
+const getSales = async (userId, { filterMonth = 'all', filterVegetable = 'all', limit = 10, skip = 0 }) => {
   try {
-    const query = {};
+    const query = { userId };
     if (filterVegetable !== 'all') query.vegetable = filterVegetable;
     if (filterMonth !== 'all') {
       const now = new Date();
@@ -39,36 +37,38 @@ const getSales = async ({ filterMonth = 'all', filterVegetable = 'all', limit = 
       .skip(skip)
       .limit(limit)
       .lean();
-    logger.info(`Retrieved ${sales.length} sales`);
+    logger.info('Retrieved sales from MongoDB', { count: sales.length, filterMonth, filterVegetable, userId });
     return sales;
   } catch (error) {
-    logger.error(`Failed to retrieve sales: ${error.message}`, { error });
+    logger.error('Failed to retrieve sales', { error: error.message, stack: error.stack, filterMonth, filterVegetable, userId });
     throw error;
   }
 };
 
-// Update
-const updateSale = async (id, updateData) => {
+const updateSale = async (userId, id, updateData) => {
   try {
-    const sale = await Sale.findByIdAndUpdate(id, { $set: updateData }, { new: true, runValidators: true });
-    if (!sale) throw new Error('Sale not found');
-    logger.info(`Updated sale ID: ${id}`);
+    const sale = await Sale.findOneAndUpdate(
+      { _id: id, userId },
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+    if (!sale) throw new Error('Sale not found or unauthorized');
+    logger.info('Updated sale in MongoDB', { id, userId });
     return sale;
   } catch (error) {
-    logger.error(`Failed to update sale: ${error.message}`, { error });
+    logger.error('Failed to update sale', { error: error.message, stack: error.stack, id, userId });
     throw error;
   }
 };
 
-// Delete
-const deleteSale = async (id) => {
+const deleteSale = async (userId, id) => {
   try {
-    const sale = await Sale.findByIdAndDelete(id);
-    if (!sale) throw new Error('Sale not found');
-    logger.info(`Deleted sale ID: ${id}`);
+    const sale = await Sale.findOneAndDelete({ _id: id, userId });
+    if (!sale) throw new Error('Sale not found or unauthorized');
+    logger.info('Deleted sale from MongoDB', { id, userId });
     return sale;
   } catch (error) {
-    logger.error(`Failed to delete sale: ${error.message}`, { error });
+    logger.error('Failed to delete sale', { error: error.message, stack: error.stack, id, userId });
     throw error;
   }
 };

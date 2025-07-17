@@ -10,6 +10,7 @@ const imageDiagnoseRoutes = require('./routes/imageDiagnose.js');
 const saleRoutes = require('./routes/saleRoutes.js');
 const cropRoutes = require('./routes/cropRoutes.js');
 const errorHandler = require('./middleware/errorHandler.js');
+const authRoutes = require('./routes/authRoutes.js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,11 +29,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 
-
+app.use('/api/auth', authRoutes);
 app.use('/api/text', textDiagnoseRoutes); 
  app.use('/api/image', imageDiagnoseRoutes); // Namespace image routes
-app.use('/api', saleRoutes)
-app.use('/api', cropRoutes);
+app.use('/api', authenticateJWT, saleRoutes);
+app.use('/api', authenticateJWT, cropRoutes);
 
 
 app.get('/health', (req, res) => {

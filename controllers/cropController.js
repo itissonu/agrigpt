@@ -1,6 +1,6 @@
-const cropService = require('../services/cropService.js');
+const cropService = require('../services/cropService');
 const { body, param, validationResult } = require('express-validator');
-const { logger } = require('../logger.js');
+const { logger } = require('../logger');
 
 const createCrop = [
   body('name').notEmpty().withMessage('Crop name is required'),
@@ -23,13 +23,14 @@ const createCrop = [
       }
 
       const cropData = req.body;
-      logger.debug('Creating crop', { name: cropData.name, variety: cropData.variety });
+      const userId = req.user.userId;
+      logger.debug('Creating crop', { name: cropData.name, variety: cropData.variety, userId });
 
-      const crop = await cropService.createCrop(cropData);
-      logger.info('Crop created', { cropId: crop._id, name: cropData.name });
+      const crop = await cropService.createCrop(userId, cropData);
+      logger.info('Crop created', { cropId: crop._id, name: cropData.name, userId });
       res.status(201).json({ crop });
     } catch (error) {
-      logger.error('Create crop error', { error: error.message, stack: error.stack, body: req.body });
+      logger.error('Create crop error', { error: error.message, stack: error.stack, body: req.body, userId: req.user.userId });
       res.status(500).json({ error: 'Failed to create crop', details: error.message });
     }
   },
@@ -47,13 +48,14 @@ const getCrops = [
       }
 
       const { limit, skip } = req.body;
-      logger.debug('Fetching crops', { limit, skip });
+      const userId = req.user.userId;
+      logger.debug('Fetching crops', { limit, skip, userId });
 
-      const crops = await cropService.getCrops({ limit, skip });
-      logger.info('Retrieved crops', { count: crops.length });
+      const crops = await cropService.getCrops(userId, { limit, skip });
+      logger.info('Retrieved crops', { count: crops.length, userId });
       res.json({ crops });
     } catch (error) {
-      logger.error('Get crops error', { error: error.message, stack: error.stack, body: req.body });
+      logger.error('Get crops error', { error: error.message, stack: error.stack, body: req.body, userId: req.user.userId });
       res.status(500).json({ error: 'Failed to retrieve crops', details: error.message });
     }
   },
@@ -82,13 +84,14 @@ const updateCrop = [
 
       const { id } = req.params;
       const updateData = req.body;
-      logger.debug('Updating crop', { id, updateData });
+      const userId = req.user.userId;
+      logger.debug('Updating crop', { id, updateData, userId });
 
-      const crop = await cropService.updateCrop(id, updateData);
-      logger.info('Crop updated', { cropId: id, name: crop.name });
+      const crop = await cropService.updateCrop(userId, id, updateData);
+      logger.info('Crop updated', { cropId: id, name: crop.name, userId });
       res.json({ crop });
     } catch (error) {
-      logger.error('Update crop error', { error: error.message, stack: error.stack, params: req.params });
+      logger.error('Update crop error', { error: error.message, stack: error.stack, params: req.params, userId: req.user.userId });
       res.status(500).json({ error: 'Failed to update crop', details: error.message });
     }
   },
@@ -105,13 +108,14 @@ const deleteCrop = [
       }
 
       const { id } = req.params;
-      logger.debug('Deleting crop', { id });
+      const userId = req.user.userId;
+      logger.debug('Deleting crop', { id, userId });
 
-      const crop = await cropService.deleteCrop(id);
-      logger.info('Crop deleted', { cropId: id, name: crop.name });
+      const crop = await cropService.deleteCrop(userId, id);
+      logger.info('Crop deleted', { cropId: id, name: crop.name, userId });
       res.json({ message: 'Crop deleted', crop });
     } catch (error) {
-      logger.error('Delete crop error', { error: error.message, stack: error.stack, params: req.params });
+      logger.error('Delete crop error', { error: error.message, stack: error.stack, params: req.params, userId: req.user.userId });
       res.status(500).json({ error: 'Failed to delete crop', details: error.message });
     }
   },

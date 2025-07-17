@@ -3,78 +3,75 @@ const { logger } = require('../logger');
 const { sendPushNotification } = require('./notificationService.js');
 const cron = require('node-cron');
 
-// Create
-const createCrop = async (cropData) => {
+const createCrop = async (userId, cropData) => {
   try {
-    const { currentStage, quantity, sellingPrice, ...rest } = cropData;
+    const { currentStage, ...rest } = cropData;
     const progress = calculateProgress(currentStage);
-    const crop = await Crop.create({ ...rest, currentStage, progress });
-    logger.info('Created crop', { cropId: crop._id, name: cropData.name });
-    
-    // Schedule notification if whenToPluck is set
+    const crop = await Crop.create({ userId, ...rest, currentStage, progress });
+    logger.info('Created crop', { cropId: crop._id, name: cropData.name, userId });
+
     if (crop.whenToPluck && crop.deviceToken) {
       scheduleHarvestNotification(crop);
     }
-    
+
     return crop;
   } catch (error) {
-    logger.error('Failed to create crop', { error: error.message, stack: error.stack, cropData });
+    logger.error('Failed to create crop', { error: error.message, stack: error.stack, cropData, userId });
     throw error;
   }
 };
 
-// Read
-const getCrops = async ({ limit = 10, skip = 0 }) => {
+const getCrops = async (userId, { limit = 10, skip = 0 }) => {
   try {
-    const crops = await Crop.find({})
+    const crops = await Crop.find({ userId })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
-    logger.info('Retrieved crops', { count: crops.length });
+    logger.info('Retrieved crops', { count: crops.length, userId });
     return crops;
   } catch (error) {
-    logger.error('Failed to retrieve crops', { error: error.message, stack: error.stack });
+    logger.error('Failed to retrieve crops', { error: error.message, stack: error.stack, userId });
     throw error;
   }
 };
 
-// Update
-const updateCrop = async (id, updateData) => {
+const updateCrop = async (userId, id, updateData) => {
   try {
-    const { currentStage, quantity, sellingPrice, ...rest } = updateData;
+    const { currentStage, ...rest } = updateData;
     if (currentStage) {
       rest.progress = calculateProgress(currentStage);
     }
-    const crop = await Crop.findByIdAndUpdate(id, { $set: rest }, { new: true, runValidators: true });
-    if (!crop) throw new Error('Crop not found');
-    logger.info('Updated crop', { cropId: id, name: crop.name });
+    const crop = await Crop.findOneAndUpdate(
+      { _id: id, userId },
+      { $set: rest },
+      { new: true, runValidators: true }
+    );
+    if (!crop) throw new Error('Crop not found or unauthorized');
+    logger.info('Updated crop', { cropId: id, name: crop.name, userId });
 
-    // Reschedule notification if whenToPluck is updated
     if (updateData.whenToPluck && crop.deviceToken) {
       scheduleHarvestNotification(crop);
     }
 
     return crop;
   } catch (error) {
-    logger.error('Failed to update crop', { error: error.message, stack: error.stack, id });
+    logger.error('Failed to update crop', { error: error.message, stack: error.stack, id, userId });
     throw error;
   }
 };
 
-// Delete
-const deleteCrop = async (id) => {
+const deleteCrop = async (userId, id) => {
   try {
-    const crop = await Crop.findByIdAndDelete(id);
-    if (!crop) throw new Error('Crop not found');
-    logger.info('Deleted crop', { cropId: id, name: crop.name });
+    const crop = await Crop.findOneAndDelete({ _id: id, userId });
+    if (!crop) throw new Error('Crop not found or unauthorized');
+    logger.info('Deleted crop', { cropId: id, name: crop.name, userId });
     return crop;
   } catch (error) {
-    logger.error('Failed to delete crop', { error: error.message, stack: error.stack, id });
+    logger.error('Failed to delete crop', { error: error.message, stack: error.stack, id, userId });
     throw error;
   }
 };
-
 
 const calculateProgress = (stage) => {
   const stages = {
@@ -92,7 +89,6 @@ const scheduleHarvestNotification = (crop) => {
   const now = new Date();
   if (pluckDate <= now) return;
 
-
   const schedule = `${pluckDate.getMinutes()} ${pluckDate.getHours()} ${pluckDate.getDate()} ${pluckDate.getMonth() + 1} *`;
   cron.schedule(schedule, async () => {
     try {
@@ -107,4 +103,5 @@ const scheduleHarvestNotification = (crop) => {
   }, { timezone: 'Asia/Kolkata' });
   logger.info('Scheduled harvest notification', { cropId: crop._id, whenToPluck: crop.whenToPluck });
 };
+
 module.exports = { createCrop, getCrops, updateCrop, deleteCrop };

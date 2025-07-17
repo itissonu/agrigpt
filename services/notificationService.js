@@ -2,7 +2,7 @@ const admin = require('firebase-admin');
 const { logger } = require('../logger');
 
 admin.initializeApp({
-  credential: admin.credential.cert(require('../firebase-service-account.json')),
+  credential: admin.credential.cert(require('../config/firebase-service-account.json')),
 });
 
 const sendPushNotification = async (deviceToken, title, body) => {
