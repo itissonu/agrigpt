@@ -1,6 +1,6 @@
-const saleService = require('../services/saleService');
+const saleService = require('../services/saleService.js');
 const { body, param, validationResult } = require('express-validator');
-const { logger } = require('../logger');
+const { logger } = require('../logger.js');
 
 const createSale = [
   body('date').isISO8601().toDate().withMessage('Invalid date'),

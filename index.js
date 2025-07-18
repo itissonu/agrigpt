@@ -11,6 +11,8 @@ const saleRoutes = require('./routes/saleRoutes.js');
 const cropRoutes = require('./routes/cropRoutes.js');
 const errorHandler = require('./middleware/errorHandler.js');
 const authRoutes = require('./routes/authRoutes.js');
+const { authenticateJWT } = require('./middleware/authMiddleware.js');
+const { logger } = require('./logger.js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;

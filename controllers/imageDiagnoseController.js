@@ -1,6 +1,7 @@
 const roboflowService = require('../services/roboflowService.js');
 const remedyService = require('../services/remedyService.js');
 const historyService = require('../services/historyService.js');
+const diagnosisService = require('../services/diagnose.js');
 
 const diagnoseImage = async (req, res) => {
   try {
@@ -23,12 +24,22 @@ const diagnoseImage = async (req, res) => {
     };
 
    
-    await historyService.saveImageDiagnosis({
-      imagePrediction: prediction.disease,
-      confidence: prediction.confidence,
-      remedy,
-      timestamp: new Date().toISOString()
-    });
+   const diagnosisRecord = await diagnosisService.saveDiagnosis(userId, {
+        type: 'image',
+        crop: prediction.crop || 'unknown',
+        diagnosis: {
+          disease: prediction.disease,
+          cause: remedy.cause,
+          organic: remedy.organic,
+          chemical: remedy.chemical,
+          prevention: remedy.prevention,
+          confidence: prediction.confidence,
+        },
+        imageUrl: req.file.path,
+        sessionId,
+      });
+
+      logger.info('Image diagnosis completed', { crop: prediction.crop, sessionId, diagnosisId: diagnosisRecord._id, userId });
 
     res.json(result);
   } catch (error) {

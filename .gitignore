@@ -1,6 +1,10 @@
 # Dependencies
 node_modules/
 
+config/
+
+config/firebase-service-account.json
+
 # Environment
 .env
 

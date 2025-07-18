@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
-const redis = require('redis');
+
 const User = require('../models/User');
 const { logger } = require('../logger');
 
-const redisClient = redis.createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
-redisClient.connect().then(() => logger.info('Redis connected for auth', { component: 'redis' }));
+// const redisClient = redis.createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
+// redisClient.connect().then(() => logger.info('Redis connected for auth', { component: 'redis' }));
 
 const registerUser = async ({ email, phone, password, deviceToken }) => {
   try {
@@ -30,7 +30,7 @@ const loginUser = async ({ email, phone, password }) => {
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
     const sessionData = { userId: user._id, email: user.email, phone: user.phone, deviceToken: user.deviceToken };
-    await redisClient.setEx(`session:${token}`, 24 * 3600, JSON.stringify(sessionData));
+   // await redisClient.setEx(`session:${token}`, 24 * 3600, JSON.stringify(sessionData));
     logger.info('User logged in', { userId: user._id, email, phone });
 
     return { token, user: { id: user._id, email: user.email, phone: user.phone, deviceToken: user.deviceToken } };
@@ -42,7 +42,7 @@ const loginUser = async ({ email, phone, password }) => {
 
 const logoutUser = async (token) => {
   try {
-    await redisClient.del(`session:${token}`);
+    //await redisClient.del(`session:${token}`);
     logger.info('User logged out', { token });
   } catch (error) {
     logger.error('User logout failed', { error: error.message, stack: error.stack, token });
@@ -50,15 +50,30 @@ const logoutUser = async (token) => {
   }
 };
 
+
 const getSessionData = async (token) => {
   try {
-    const sessionData = await redisClient.get(`session:${token}`);
-    if (!sessionData) throw new Error('Invalid or expired session');
-    return JSON.parse(sessionData);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // You can customize and return only what you need
+    return {
+      userId: decoded.userId,
+      // optionally include more fields if needed
+    };
   } catch (error) {
-    logger.error('Failed to get session data', { error: error.message, stack: error.stack, token });
-    throw error;
+    logger.error('Failed to decode token', { error: error.message, token });
+    throw new Error('Invalid or expired token');
   }
 };
+// const getSessionData = async (token) => {
+//   try {
+//   //  const sessionData = await redisClient.get(`session:${token}`);
+//     //if (!sessionData) throw new Error('Invalid or expired session');
+//     return JSON.parse(sessionData);
+//   } catch (error) {
+//     logger.error('Failed to get session data', { error: error.message, stack: error.stack, token });
+//     throw error;
+//   }
+// };
 
-module.exports = { registerUser, loginUser, logoutUser, getSessionData };
+module.exports = { registerUser, loginUser, logoutUser ,getSessionData};

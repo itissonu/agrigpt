@@ -18,11 +18,11 @@ const getDiagnosis = async (crop, symptoms,language) => {
 };
 
 const getGeminiDiagnosis = async (crop, symptoms,language) => {
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-    const model = 'gemini-1.5-flash';
+       const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
+    const endpoint = 'https://api.perplexity.ai/chat/completions'; // Hypothetical
 
-    if (!GEMINI_API_KEY) {
-        throw new Error('Gemini API key not configured');
+    if (!PERPLEXITY_API_KEY) {
+        throw new Error('Perplexity API key not configured');
     }
 
     const prompt = `
@@ -44,33 +44,31 @@ Provide this information in ${language}:
 Only return JSON.
 `;
 
-
     const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+        endpoint,
         {
-            contents: [
-                {
-                    parts: [
-                        { text: prompt }
-                    ]
-                }
+            model: 'sonar', // Hypothetical model, replace if needed
+            messages: [
+                { role: 'system', content: 'You are a helpful agriculture assistant.' },
+                { role: 'user', content: prompt }
             ]
         },
         {
             headers: {
+                'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
                 'Content-Type': 'application/json'
             }
         }
     );
 
-    const generatedText = response.data.candidates[0].content.parts[0].text;
-    const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+    const reply = response.data.choices?.[0]?.message?.content;
+    const jsonMatch = reply.match(/\{[\s\S]*\}/);
 
     if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
     }
 
-    throw new Error('Failed to parse Gemini API response');
+    throw new Error('Failed to parse Perplexity response');
 };
 
 const getRuleBasedDiagnosis = (crop, symptoms) => {
@@ -132,3 +130,75 @@ module.exports = {
     getDiagnosis,
 
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+//     const model = 'gemini-1.5-flash';
+
+//     if (!GEMINI_API_KEY) {
+//         throw new Error('Gemini API key not configured');
+//     }
+
+//     const prompt = `
+// You are a crop disease expert.
+
+// Crop: ${crop}
+// Symptoms: ${symptoms}
+// Language: ${language}
+
+// Provide this information in ${language}:
+
+// {
+//   "disease": "...",
+//   "cause": "...",
+//   "organic": "...",
+//   "chemical": "...",
+//   "prevention": "..."
+// }
+// Only return JSON.
+// `;
+
+
+//     const response = await axios.post(
+//         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+//         {
+//             contents: [
+//                 {
+//                     parts: [
+//                         { text: prompt }
+//                     ]
+//                 }
+//             ]
+//         },
+//         {
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             }
+//         }
+//     );
+
+//     const generatedText = response.data.candidates[0].content.parts[0].text;
+//     const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+
+//     if (jsonMatch) {
+//         return JSON.parse(jsonMatch[0]);
+//     }
+
+//     throw new Error('Failed to parse Gemini API response');

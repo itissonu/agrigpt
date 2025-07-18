@@ -1,6 +1,6 @@
-const authService = require('../services/authService');
+const authService = require('../services/authService.js');
 const { body, validationResult } = require('express-validator');
-const { logger } = require('../logger');
+const { logger } = require('../logger.js');
 
 const register = [
   body('email').optional().isEmail().withMessage('Invalid email'),

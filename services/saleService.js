@@ -1,4 +1,4 @@
-const Sale = require('../models/Sale');
+const Sale = require('../models/sales.js');
 const { logger } = require('../logger');
 
 const createSale = async (userId, saleData) => {

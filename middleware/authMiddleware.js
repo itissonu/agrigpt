@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const { logger } = require('../logger');
-const authService = require('../services/authService');
+const { logger } = require('../logger.js');
+const authService = require('../services/authService.js');
 
 const authenticateJWT = async (req, res, next) => {
   try {
@@ -9,10 +9,12 @@ const authenticateJWT = async (req, res, next) => {
       logger.warn('No token provided', { ip: req.ip });
       return res.status(401).json({ error: 'No token provided' });
     }
+  console.log(" token"+token);
+
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const sessionData = await authService.getSessionData(token);
-    req.user = { userId: decoded.userId, ...sessionData };
+   // const sessionData = await authService.getSessionData(token);
+    req.user = { userId: decoded.userId };
     logger.debug('Token validated', { userId: decoded.userId });
     next();
   } catch (error) {

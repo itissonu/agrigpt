@@ -1,6 +1,6 @@
-const cropService = require('../services/cropService');
+const cropService = require('../services/cropService.js');
 const { body, param, validationResult } = require('express-validator');
-const { logger } = require('../logger');
+const { logger } = require('../logger.js');
 
 const createCrop = [
   body('name').notEmpty().withMessage('Crop name is required'),
