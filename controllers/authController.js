@@ -39,10 +39,10 @@ const login = [
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const { email, phone, password } = req.body;
+      const { email, phone, password  } = req.body;
       logger.debug('Logging in user', { email, phone });
 
-      const { token, user } = await authService.loginUser({ email, phone, password });
+      const { token, user } = await authService.loginUser({ email, phone, password  });
       res.json({ token, user });
     } catch (error) {
       logger.error('Login error', { error: error.message, stack: error.stack, body: req.body });

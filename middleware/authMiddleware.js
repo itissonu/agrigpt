@@ -13,8 +13,8 @@ const authenticateJWT = async (req, res, next) => {
 
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-   // const sessionData = await authService.getSessionData(token);
-    req.user = { userId: decoded.userId };
+    const sessionData = await authService.getSessionData(token);
+    req.user = { userId: decoded.userId, ...sessionData };
     logger.debug('Token validated', { userId: decoded.userId });
     next();
   } catch (error) {

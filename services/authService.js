@@ -21,7 +21,7 @@ const registerUser = async ({ email, phone, password, deviceToken }) => {
   }
 };
 
-const loginUser = async ({ email, phone, password }) => {
+const loginUser = async ({ email, phone, password  }) => {
   try {
     if (!email && !phone) throw new Error('Email or phone is required');
     const user = await User.findOne({ $or: [{ email }, { phone }] });
@@ -30,7 +30,7 @@ const loginUser = async ({ email, phone, password }) => {
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
     const sessionData = { userId: user._id, email: user.email, phone: user.phone, deviceToken: user.deviceToken };
-   // await redisClient.setEx(`session:${token}`, 24 * 3600, JSON.stringify(sessionData));
+   
     logger.info('User logged in', { userId: user._id, email, phone });
 
     return { token, user: { id: user._id, email: user.email, phone: user.phone, deviceToken: user.deviceToken } };
