@@ -41,6 +41,7 @@ const updateCrop = async (userId, id, updateData) => {
     const { currentStage, ...rest } = updateData;
     if (currentStage) {
       rest.progress = calculateProgress(currentStage);
+        rest.currentStage = currentStage;
     }
     const crop = await Crop.findOneAndUpdate(
       { _id: id, userId },

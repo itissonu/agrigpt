@@ -86,6 +86,7 @@ const updateCrop = [
       const updateData = req.body;
       const userId = req.user.userId;
       logger.debug('Updating crop', { id, updateData, userId });
+      console.log(updateData)
 
       const crop = await cropService.updateCrop(userId, id, updateData);
       logger.info('Crop updated', { cropId: id, name: crop.name, userId });

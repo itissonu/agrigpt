@@ -8,7 +8,7 @@ const { logger } = require('../logger');
 
 const registerUser = async ({ email, phone, password, deviceToken }) => {
   try {
-    if (!email && !phone) throw new Error('Email or phone is required');
+    if (!email || !phone) throw new Error('Email or phone is required');
     const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
     if (existingUser) throw new Error('Email or phone already exists');
 
