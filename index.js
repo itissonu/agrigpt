@@ -12,6 +12,7 @@ const cropRoutes = require('./routes/cropRoutes.js');
 const errorHandler = require('./middleware/errorHandler.js');
 const authRoutes = require('./routes/authRoutes.js');
 const { authenticateJWT } = require('./middleware/authMiddleware.js');
+const expenditureRoutes = require('./routes/expenditure.js');
 const { logger } = require('./logger.js');
 
 const app = express();
@@ -32,10 +33,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 app.use('/api/auth', authRoutes);
-app.use('/api/text', textDiagnoseRoutes); 
- app.use('/api/image', imageDiagnoseRoutes); // Namespace image routes
+app.use('/api/text', textDiagnoseRoutes);
+app.use('/api/image', imageDiagnoseRoutes); // Namespace image routes
 app.use('/api', authenticateJWT, saleRoutes);
 app.use('/api', authenticateJWT, cropRoutes);
+app.use('/api',authenticateJWT, expenditureRoutes);
 
 
 app.get('/health', (req, res) => {
@@ -43,7 +45,7 @@ app.get('/health', (req, res) => {
 });
 
 
- app.use(errorHandler);
+app.use(errorHandler);
 
 
 
