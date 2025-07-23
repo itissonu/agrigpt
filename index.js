@@ -13,7 +13,9 @@ const errorHandler = require('./middleware/errorHandler.js');
 const authRoutes = require('./routes/authRoutes.js');
 const { authenticateJWT } = require('./middleware/authMiddleware.js');
 const expenditureRoutes = require('./routes/expenditure.js');
+const diseaseRoutes = require('./routes/diseaseRoutes');
 const { logger } = require('./logger.js');
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +40,9 @@ app.use('/api/image', imageDiagnoseRoutes); // Namespace image routes
 app.use('/api', authenticateJWT, saleRoutes);
 app.use('/api', authenticateJWT, cropRoutes);
 app.use('/api',authenticateJWT, expenditureRoutes);
+app.use('/api', diseaseRoutes);
+//app.use('/api', expenditureRoutes);
+
 
 
 app.get('/health', (req, res) => {

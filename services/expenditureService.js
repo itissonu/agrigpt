@@ -48,6 +48,7 @@ const deleteExpenditure = async (id, userId) => {
 
 const getExpenditures = async (userId, filters = {}) => {
   try {
+    console.log(filters)
     const query = { recordedBy: userId, ...filters };
     const expenditures = await Expenditure.find(query).populate('recordedBy', 'email phone');
     logger.debug('Expenditures fetched', { recordedBy: userId, count: expenditures.length });
