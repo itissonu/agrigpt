@@ -14,6 +14,7 @@ const authRoutes = require('./routes/authRoutes.js');
 const { authenticateJWT } = require('./middleware/authMiddleware.js');
 const expenditureRoutes = require('./routes/expenditure.js');
 const diseaseRoutes = require('./routes/diseaseRoutes');
+
 const { logger } = require('./logger.js');
 
 
@@ -35,12 +36,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 app.use('/api/auth', authRoutes);
+app.use('/api/disease', diseaseRoutes); 
 app.use('/api/text', textDiagnoseRoutes);
 app.use('/api/image', imageDiagnoseRoutes); // Namespace image routes
-app.use('/api', authenticateJWT, saleRoutes);
-app.use('/api', authenticateJWT, cropRoutes);
-app.use('/api',authenticateJWT, expenditureRoutes);
-app.use('/api', diseaseRoutes);
+app.use('/api',  saleRoutes);
+app.use('/api', cropRoutes);
+app.use('/api', expenditureRoutes);
+
+
+
 //app.use('/api', expenditureRoutes);
 
 
