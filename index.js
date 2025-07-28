@@ -34,7 +34,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-
+app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/auth', authRoutes);
 app.use('/api/disease', diseaseRoutes); 
 app.use('/api/text', textDiagnoseRoutes);

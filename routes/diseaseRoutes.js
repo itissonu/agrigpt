@@ -3,8 +3,8 @@ const { getDiseases, getDiseaseById, getFilterOptions } = require("../controller
 const router = express.Router();
 
 
-router.get("/", getDiseases); // list + filters
-// router.get("/:id", getDiseaseById); // detail
+router.get("/", getDiseases); 
+
 router.get("/filters", getFilterOptions);
 
 module.exports = router;
