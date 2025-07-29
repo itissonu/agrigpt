@@ -5,7 +5,10 @@ const createSale = async (userId, saleData) => {
   try {
     const sale = await Sale.create({ userId, ...saleData });
     logger.info('Saved sale to MongoDB', { saleId: sale._id, vegetable: saleData.vegetable, userId });
-    return sale;
+    return Sale.findById(sale._id).populate('vegetable')
+    
+    
+      
   } catch (error) {
     logger.error('Failed to save sale', { error: error.message, stack: error.stack, saleData, userId });
     throw error;
@@ -32,11 +35,12 @@ const getSales = async (userId, { filterMonth = 'all', filterVegetable = 'all', 
         };
       }
     }
-    const sales = await Sale.find(query)
+    const sales = await Sale.find(query).
+    populate('vegetable')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .lean();
+      
     logger.info('Retrieved sales from MongoDB', { count: sales.length, filterMonth, filterVegetable, userId });
     return sales;
   } catch (error) {
@@ -46,17 +50,25 @@ const getSales = async (userId, { filterMonth = 'all', filterVegetable = 'all', 
 };
 
 const updateSale = async (userId, id, updateData) => {
-  try {
+   try {
     const sale = await Sale.findOneAndUpdate(
       { _id: id, userId },
       { $set: updateData },
       { new: true, runValidators: true }
     );
     if (!sale) throw new Error('Sale not found or unauthorized');
+
     logger.info('Updated sale in MongoDB', { id, userId });
-    return sale;
+
+    const populatedSale = await Sale.findById(sale._id).populate('vegetable');
+    return populatedSale;
   } catch (error) {
-    logger.error('Failed to update sale', { error: error.message, stack: error.stack, id, userId });
+    logger.error('Failed to update sale', {
+      error: error.message,
+      stack: error.stack,
+      id,
+      userId,
+    });
     throw error;
   }
 };

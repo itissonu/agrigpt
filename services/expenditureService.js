@@ -50,7 +50,11 @@ const getExpenditures = async (userId, filters = {}) => {
   try {
     console.log(filters)
     const query = { recordedBy: userId, ...filters };
-    const expenditures = await Expenditure.find(query).populate('recordedBy', 'email phone');
+    const expenditures = await Expenditure.find(query)
+      .populate('recordedBy', 'email phone')
+      .populate('cropsInvolved', ' area')
+      .populate('allocations.cropId', 'name area');
+
     logger.debug('Expenditures fetched', { recordedBy: userId, count: expenditures.length });
     return { expenditures };
   } catch (error) {
@@ -61,7 +65,12 @@ const getExpenditures = async (userId, filters = {}) => {
 
 const getExpenditureCategories = async (userId) => {
   try {
-    const categories = await Expenditure.distinct('category', { recordedBy: userId });
+    let filter = { recordedBy: userId };
+    // if (cropId) {
+    //   filter.cropsInvolved = cropId;
+    // }
+
+    const categories = await Expenditure.distinct('category', filter);
     logger.debug('Expenditure categories fetched', { recordedBy: userId, count: categories.length });
     return { categories };
   } catch (error) {

@@ -3,7 +3,11 @@ const mongoose = require('mongoose');
 const saleSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   date: { type: String, required: true },
-  vegetable: { type: String, required: true },
+  vegetable: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Crop',
+    required: true,
+  },
   quantity: { type: String, required: true },
   sellingPrice: { type: Number, required: true },
   totalAmount: { type: Number, required: true },

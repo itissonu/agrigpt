@@ -1,17 +1,43 @@
 const mongoose = require('mongoose');
 
+
+const allocationSchema = new mongoose.Schema({
+  cropId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Crop',
+    required: true,
+  },
+  allocatedAmount: {
+    type: Number,
+    required: true,
+    min: 0,
+  }
+}, { _id: false });
+
 const expenditureSchema = new mongoose.Schema(
   {
     category: {
       type: String,
       required: true,
-     
+
     },
     subCategory: {
       type: String,
       default: '',
       // Example: "Organic Seeds", "Tractor Repair", etc.
     },
+    cropsInvolved: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Crop'
+      }
+    ],
+    allocationMethod: {
+      type: String,
+      enum: ['manual', 'fieldSize'],
+      default: 'manual',
+    },
+    allocations: [allocationSchema],
     amount: {
       type: Number,
       required: true,
@@ -43,12 +69,12 @@ const expenditureSchema = new mongoose.Schema(
     farmSection: {
       type: String,
       default: '',
-      
+
     },
     recordedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true, 
+      required: true,
     },
     notes: {
       type: String,

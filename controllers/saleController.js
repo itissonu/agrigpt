@@ -4,7 +4,8 @@ const { logger } = require('../logger.js');
 
 const createSale = [
   body('date').isISO8601().toDate().withMessage('Invalid date'),
-  body('vegetable').notEmpty().withMessage('Vegetable is required'),
+  body('vegetable').isMongoId().withMessage('Invalid crop (vegetable) ID'),
+
   body('quantity').notEmpty().withMessage('Quantity is required'),
   body('sellingPrice').isFloat({ min: 0 }).withMessage('Invalid selling price'),
   body('buyerName').notEmpty().withMessage('Buyer name is required'),
@@ -34,6 +35,7 @@ const createSale = [
         notes,
       });
       logger.info('Sale created', { saleId: sale._id, vegetable, totalAmount, userId });
+      console.log({"sale from controller":sale})
       res.status(201).json({ sale });
     } catch (error) {
       logger.error('Create sale error', { error: error.message, stack: error.stack, body: req.body, userId: req.user.userId });
@@ -61,6 +63,7 @@ const getSales = [
 
       const sales = await saleService.getSales(userId, { filterMonth, filterVegetable, limit, skip });
       logger.info('Retrieved sales', { count: sales.length, filterMonth, filterVegetable, userId });
+      console.log({"sales ingetroutercontroller":sales})
       res.json({ sales });
     } catch (error) {
       logger.error('Get sales error', { error: error.message, stack: error.stack, body: req.body, userId: req.user.userId });
@@ -83,9 +86,11 @@ const updateSale = [
 
       const { id } = req.params;
       const updateData = req.body;
+      console.log({"updatedata":updateData})
       if (updateData.quantity && updateData.sellingPrice) {
         updateData.totalAmount = parseFloat(updateData.quantity.split(' ')[0]) * parseFloat(updateData.sellingPrice);
       }
+      console.log({"after updatedata":updateData})
       const userId = req.user.userId;
       logger.debug('Updating sale', { id, updateData, userId });
 

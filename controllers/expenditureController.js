@@ -14,6 +14,13 @@ const createExpenditure = [
   body('invoiceNumber').optional().isString().withMessage('Invalid invoice number'),
   body('farmSection').optional().isString().withMessage('Invalid farm section'),
   body('notes').optional().isString().withMessage('Invalid notes'),
+  body('allocationMethod').optional().isIn(['manual', 'fieldSize']).withMessage('Invalid allocation method'),
+  body('cropsInvolved').optional().isArray().withMessage('Crops involved must be an array of crop IDs'),
+  body('cropsInvolved.*').isMongoId().withMessage('Invalid crop ID in cropsInvolved'),
+  body('allocations').optional().isArray().withMessage('Allocations must be an array'),
+  body('allocations.*.cropId').isMongoId().withMessage('Invalid crop ID in allocations'),
+  body('allocations.*.allocatedAmount').isFloat({ min: 0 }).withMessage('Allocated amount must be positive'),
+
   async (req, res) => {
     try {
       const errors = validationResult(req);
@@ -43,6 +50,9 @@ const createExpenditure = [
           createdAt: result.expenditure.createdAt,
           updatedAt: result.expenditure.updatedAt,
           notes: result.expenditure.notes,
+          allocationMethod: result.expenditure.allocationMethod,
+          cropsInvolved: result.expenditure.cropsInvolved,
+          allocations: result.expenditure.allocations,
         },
       });
     } catch (error) {
@@ -63,6 +73,13 @@ const updateExpenditure = [
   body('invoiceNumber').optional().isString().withMessage('Invalid invoice number'),
   body('farmSection').optional().isString().withMessage('Invalid farm section'),
   body('notes').optional().isString().withMessage('Invalid notes'),
+  body('allocationMethod').optional().isIn(['manual', 'fieldSize']),
+  body('cropsInvolved').optional().isArray(),
+  body('cropsInvolved.*').optional().isMongoId(),
+  body('allocations').optional().isArray(),
+  body('allocations.*.cropId').optional().isMongoId(),
+  body('allocations.*.allocatedAmount').optional().isFloat({ min: 0 }),
+
   async (req, res) => {
     try {
       const errors = validationResult(req);
@@ -88,6 +105,9 @@ const updateExpenditure = [
           createdAt: result.expenditure.createdAt,
           updatedAt: result.expenditure.updatedAt,
           notes: result.expenditure.notes,
+          allocationMethod: result.expenditure.allocationMethod,
+          cropsInvolved: result.expenditure.cropsInvolved,
+          allocations: result.expenditure.allocations,
         },
       });
     } catch (error) {
@@ -117,6 +137,9 @@ const deleteExpenditure = [
           createdAt: result.expenditure.createdAt,
           updatedAt: result.expenditure.updatedAt,
           notes: result.expenditure.notes,
+          allocationMethod: result.expenditure.allocationMethod,
+          cropsInvolved: result.expenditure.cropsInvolved,
+          allocations: result.expenditure.allocations,
         },
       });
     } catch (error) {
@@ -156,6 +179,9 @@ const getExpenditures = [
           createdAt: expenditure.createdAt,
           updatedAt: expenditure.updatedAt,
           notes: expenditure.notes,
+          allocationMethod: expenditure.allocationMethod,
+          cropsInvolved: expenditure.cropsInvolved,
+          allocations: expenditure.allocations,
         })),
       });
     } catch (error) {

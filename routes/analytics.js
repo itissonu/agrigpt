@@ -8,21 +8,22 @@ router.use(authenticateJWT);
 
 
 router.get('/overview', AnalyticsController.getOverviewAnalytics);
+router.get('/crop/financial-summary',AnalyticsController.getCropFinancialSummary);
+router.get('/monthly-revenue', AnalyticsController.getMonthlyRevenue);
 
+// Crop Profitability Analysis
+router.get('/crop-profitability', AnalyticsController.getCropProfitability);
 
-router.get('/revenue/monthly', AnalyticsController.getMonthlyRevenue);
+// Sales Distribution
+router.get('/sales-distribution', AnalyticsController.getSalesDistribution);
 
-// Crop analytics
-router.get('/crops/profitability', AnalyticsController.getCropProfitability);
-router.get('/sales/distribution', AnalyticsController.getSalesDistribution);
+// Seasonal Performance
+router.get('/seasonal-performance', AnalyticsController.getSeasonalPerformance);
 
-// Seasonal performance
-router.get('/seasonal', AnalyticsController.getSeasonalPerformance);
+// Expenditure Analysis
+router.get('/expenditure-analysis', AnalyticsController.getExpenditureAnalysis);
 
-// Expenditure analytics
-router.get('/expenditure', AnalyticsController.getExpenditureAnalysis);
-
-// Diagnosis statistics
-router.get('/diagnosis', AnalyticsController.getDiagnosisStats);
+// Diagnosis Statistics
+router.get('/diagnosis-stats', AnalyticsController.getDiagnosisStats);
 
 module.exports = router;
