@@ -8,6 +8,7 @@ const { authenticateJWT } = require('../middleware/authMiddleware.js');
 router.post('/run-harvest-notifications', async (req, res) => {
   try {
     const results = await require('../services/notificationService').checkAndNotifyHarvestDue();
+    
     res.status(200).json({ message: 'Harvest notifications triggered', results });
   } catch (error) {
     res.status(500).json({ error: 'Failed to trigger harvest notifications' });

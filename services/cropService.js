@@ -41,7 +41,7 @@ const updateCrop = async (userId, id, updateData) => {
     const { currentStage, ...rest } = updateData;
     if (currentStage) {
       rest.progress = calculateProgress(currentStage);
-        rest.currentStage = currentStage;
+      rest.currentStage = currentStage;
     }
     const crop = await Crop.findOneAndUpdate(
       { _id: id, userId },
@@ -51,25 +51,37 @@ const updateCrop = async (userId, id, updateData) => {
     if (!crop) throw new Error('Crop not found or unauthorized');
     logger.info('Updated crop', { cropId: id, name: crop.name, userId });
 
-     if (updateData.whenToPluck) {
-      const harvestDate = new Date(updateData.whenToPluck);
+    if (crop?.whenToPluck) {
+      console.log({ "when topluck": crop.whenToPluck })
+      const harvestDate = new Date(crop.whenToPluck);
       const today = new Date();
+
+
+      console.log({
+        "harvested day:": harvestDate,
+        "today": today
+      })
+      // Zero out the time part for accurate day difference
+      harvestDate.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+
       const daysUntilHarvest = Math.ceil((harvestDate - today) / (1000 * 60 * 60 * 24));
-      
+
+      console.log("daysuntill harvesting", daysUntilHarvest)
       // If harvest is due within 3 days, send immediate notification
       if (daysUntilHarvest <= 3 && daysUntilHarvest >= 0) {
         try {
           await notificationService.sendHarvestReminder(id, userId);
           logger.info('Immediate harvest reminder sent for updated crop', { cropId: id, daysUntilHarvest });
         } catch (notificationError) {
-          logger.warn('Failed to send immediate harvest reminder', { 
-            cropId: id, 
-            error: notificationError.message 
+          logger.warn('Failed to send immediate harvest reminder', {
+            cropId: id,
+            error: notificationError.message
           });
         }
       }
     }
-    
+
 
     // if (updateData.whenToPluck && crop.deviceToken) {
     //   scheduleHarvestNotification(crop);
@@ -129,7 +141,7 @@ const getCropsDueForHarvest = async (userId, daysAhead = 7) => {
     const today = new Date();
     const futureDate = new Date();
     futureDate.setDate(today.getDate() + daysAhead);
-    
+
     const crops = await Crop.find({
       userId,
       currentStage: { $nin: ['Harvested'] }, // Exclude already harvested crops
@@ -138,15 +150,15 @@ const getCropsDueForHarvest = async (userId, daysAhead = 7) => {
         $lte: futureDate.toISOString().split('T')[0]
       }
     }).lean();
-    
+
     logger.info('Retrieved crops due for harvest', { count: crops.length, userId, daysAhead });
     return crops;
   } catch (error) {
-    logger.error('Failed to retrieve crops due for harvest', { 
-      error: error.message, 
-      stack: error.stack, 
-      userId, 
-      daysAhead 
+    logger.error('Failed to retrieve crops due for harvest', {
+      error: error.message,
+      stack: error.stack,
+      userId,
+      daysAhead
     });
     throw error;
   }
@@ -157,7 +169,7 @@ const getHarvestCalendar = async (userId, month, year) => {
   try {
     const startDate = new Date(year, month - 1, 1); // month is 0-indexed
     const endDate = new Date(year, month, 0); // Last day of the month
-    
+
     const crops = await Crop.find({
       userId,
       $or: [
@@ -181,14 +193,14 @@ const getHarvestCalendar = async (userId, month, year) => {
         }
       ]
     }).lean();
-    
+
     // Organize crops by date
     const calendar = {};
-    
+
     crops.forEach(crop => {
       // Add start date
-      if (crop.startDate >= startDate.toISOString().split('T')[0] && 
-          crop.startDate <= endDate.toISOString().split('T')[0]) {
+      if (crop.startDate >= startDate.toISOString().split('T')[0] &&
+        crop.startDate <= endDate.toISOString().split('T')[0]) {
         if (!calendar[crop.startDate]) calendar[crop.startDate] = [];
         calendar[crop.startDate].push({
           ...crop,
@@ -196,10 +208,10 @@ const getHarvestCalendar = async (userId, month, year) => {
           description: `Planted ${crop.name} (${crop.variety})`
         });
       }
-      
+
       // Add harvest date
-      if (crop.whenToPluck >= startDate.toISOString().split('T')[0] && 
-          crop.whenToPluck <= endDate.toISOString().split('T')[0]) {
+      if (crop.whenToPluck >= startDate.toISOString().split('T')[0] &&
+        crop.whenToPluck <= endDate.toISOString().split('T')[0]) {
         if (!calendar[crop.whenToPluck]) calendar[crop.whenToPluck] = [];
         calendar[crop.whenToPluck].push({
           ...crop,
@@ -208,21 +220,23 @@ const getHarvestCalendar = async (userId, month, year) => {
         });
       }
     });
-    
+
     logger.info('Generated harvest calendar', { userId, month, year, eventCount: Object.keys(calendar).length });
     return calendar;
   } catch (error) {
-    logger.error('Failed to generate harvest calendar', { 
-      error: error.message, 
-      stack: error.stack, 
-      userId, 
-      month, 
-      year 
+    logger.error('Failed to generate harvest calendar', {
+      error: error.message,
+      stack: error.stack,
+      userId,
+      month,
+      year
     });
     throw error;
   }
 };
 
 
-module.exports = { createCrop, getCrops, updateCrop, deleteCrop ,  getCropsDueForHarvest,
-  getHarvestCalendar};
+module.exports = {
+  createCrop, getCrops, updateCrop, deleteCrop, getCropsDueForHarvest,
+  getHarvestCalendar
+};
