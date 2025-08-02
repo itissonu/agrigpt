@@ -2,7 +2,7 @@ name: Trigger Harvest Notification
 
 on:
   schedule:
-    - cron: '30 1 * * *' # Every day at 7:00 AM IST (UTC+5:30)
+    - cron: '30 1 * * *' # 7:00 AM IST
 
 jobs:
   notify:
@@ -10,4 +10,4 @@ jobs:
     steps:
       - name: Send Harvest Notification
         run: |
-          curl -X POST https://your-backend.onrender.com/api/crops/run-harvest-notifications
+          curl -X POST https://agrigpt-khpr.onrender.com/api/notifications/run-harvest-notifications

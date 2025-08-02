@@ -167,7 +167,7 @@ class NotificationService {
       };
 
       // Send web push notification if FCM token exists
-      if (user.fcmToken) {
+      if (user?.fcmToken) {
         const webResult = await this.sendWebPushNotification(
           user.fcmToken,
           notificationData.title,
