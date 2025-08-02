@@ -4,6 +4,7 @@ const { body, query,param, validationResult } = require('express-validator');
 const { logger } = require('../logger');
 const Notification = require('../models/Notification');
 const { default: mongoose } = require('mongoose');
+const { Types } = require('mongoose');
 
 
 
@@ -48,8 +49,7 @@ const getNotifications = [
 
       // Get counts by category for stats
       const categoryStats = await Notification.aggregate([
-       { $match: { userId: new mongoose.Types.ObjectId(userId) } },
-
+      { $match: { userId: Types.ObjectId(userId) } },
         { $group: { _id: '$category', count: { $sum: 1 }, unread: { $sum: { $cond: ['$isRead', 0, 1] } } } }
       ]);
 
