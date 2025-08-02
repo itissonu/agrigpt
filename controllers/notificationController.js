@@ -49,7 +49,8 @@ const getNotifications = [
 
       // Get counts by category for stats
       const categoryStats = await Notification.aggregate([
-        { $match: { userId: Types.ObjectId(userId) } },
+        {   $match: { userId: new mongoose.Types.ObjectId(userId) } },
+
         { $group: { _id: '$category', count: { $sum: 1 }, unread: { $sum: { $cond: ['$isRead', 0, 1] } } } }
       ]);
 
