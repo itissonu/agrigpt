@@ -15,4 +15,4 @@ jobs:
     steps:
       - name: Send Harvest Notification
         run: |
-          curl -X POST https://agrigpt-khpr.onrender.com/api/notification/run-harvest-notifications
+          curl -X POST https://agrigpt-khpr.onrender.com/api/notifications/run-harvest-notifications
