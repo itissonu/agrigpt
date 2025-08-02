@@ -2,10 +2,16 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  email: { type: String, unique: true, sparse: true }, 
-  phone: { type: String, unique: true, sparse: true }, 
+  email: { type: String, unique: true, sparse: true },
+  phone: { type: String, unique: true, sparse: true },
   password: { type: String, required: true },
-  deviceToken: { type: String }, 
+  deviceToken: { type: String },
+  fcmToken: { type: String },
+  notificationPreferences: {
+    harvestReminders: { type: Boolean, default: true },
+    dailyUpdates: { type: Boolean, default: false },
+    weeklyReports: { type: Boolean, default: true },
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
