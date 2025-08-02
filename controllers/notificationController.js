@@ -1,6 +1,6 @@
 const notificationService = require('../services/notificationService');
 const User = require('../models/User');
-const { body, query,param, validationResult } = require('express-validator');
+const { body, query, param, validationResult } = require('express-validator');
 const { logger } = require('../logger');
 const Notification = require('../models/Notification');
 const { default: mongoose } = require('mongoose');
@@ -49,7 +49,7 @@ const getNotifications = [
 
       // Get counts by category for stats
       const categoryStats = await Notification.aggregate([
-      { $match: { userId: Types.ObjectId(userId) } },
+        { $match: { userId: Types.ObjectId(userId) } },
         { $group: { _id: '$category', count: { $sum: 1 }, unread: { $sum: { $cond: ['$isRead', 0, 1] } } } }
       ]);
 
@@ -70,10 +70,10 @@ const getNotifications = [
       logger.info('Notifications retrieved', { userId, count: notifications.length, page, limit });
       res.json({ notifications, stats });
     } catch (error) {
-      logger.error('Get notifications error', { 
-        error: error.message, 
-        stack: error.stack, 
-        userId: req.user.userId 
+      logger.error('Get notifications error', {
+        error: error.message,
+        stack: error.stack,
+        userId: req.user.userId
       });
       res.status(500).json({ error: 'Failed to retrieve notifications' });
     }
@@ -85,13 +85,13 @@ const getUnreadCount = async (req, res) => {
   try {
     const userId = req.user.userId;
     const count = await Notification.getUnreadCount(userId);
-    
+
     res.json({ count });
   } catch (error) {
-    logger.error('Get unread count error', { 
-      error: error.message, 
-      stack: error.stack, 
-      userId: req.user.userId 
+    logger.error('Get unread count error', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user.userId
     });
     res.status(500).json({ error: 'Failed to get unread count' });
   }
@@ -123,11 +123,11 @@ const markAsRead = [
 
       res.json({ message: 'Notification marked as read', notification });
     } catch (error) {
-      logger.error('Mark as read error', { 
-        error: error.message, 
-        stack: error.stack, 
+      logger.error('Mark as read error', {
+        error: error.message,
+        stack: error.stack,
         notificationId: req.params.id,
-        userId: req.user.userId 
+        userId: req.user.userId
       });
       res.status(500).json({ error: 'Failed to mark notification as read' });
     }
@@ -138,19 +138,19 @@ const markAsRead = [
 const markAllAsRead = async (req, res) => {
   try {
     const userId = req.user.userId;
-    
+
     const result = await Notification.markAllAsRead(userId);
-    
+
     logger.info('All notifications marked as read', { userId, modifiedCount: result.modifiedCount });
-    res.json({ 
-      message: 'All notifications marked as read', 
-      modifiedCount: result.modifiedCount 
+    res.json({
+      message: 'All notifications marked as read',
+      modifiedCount: result.modifiedCount
     });
   } catch (error) {
-    logger.error('Mark all as read error', { 
-      error: error.message, 
-      stack: error.stack, 
-      userId: req.user.userId 
+    logger.error('Mark all as read error', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user.userId
     });
     res.status(500).json({ error: 'Failed to mark all notifications as read' });
   }
@@ -178,11 +178,11 @@ const deleteNotification = [
       logger.info('Notification deleted', { notificationId: id, userId });
       res.json({ message: 'Notification deleted', notification });
     } catch (error) {
-      logger.error('Delete notification error', { 
-        error: error.message, 
-        stack: error.stack, 
+      logger.error('Delete notification error', {
+        error: error.message,
+        stack: error.stack,
         notificationId: req.params.id,
-        userId: req.user.userId 
+        userId: req.user.userId
       });
       res.status(500).json({ error: 'Failed to delete notification' });
     }
@@ -193,19 +193,19 @@ const deleteNotification = [
 const deleteAllRead = async (req, res) => {
   try {
     const userId = req.user.userId;
-    
+
     const result = await Notification.deleteMany({ userId, isRead: true });
-    
+
     logger.info('All read notifications deleted', { userId, deletedCount: result.deletedCount });
-    res.json({ 
-      message: 'All read notifications deleted', 
-      deletedCount: result.deletedCount 
+    res.json({
+      message: 'All read notifications deleted',
+      deletedCount: result.deletedCount
     });
   } catch (error) {
-    logger.error('Delete all read error', { 
-      error: error.message, 
-      stack: error.stack, 
-      userId: req.user.userId 
+    logger.error('Delete all read error', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user.userId
     });
     res.status(500).json({ error: 'Failed to delete read notifications' });
   }
@@ -240,10 +240,10 @@ const createNotification = [
       logger.info('Manual notification created', { notificationId: notification._id, userId });
       res.status(201).json({ notification });
     } catch (error) {
-      logger.error('Create notification error', { 
-        error: error.message, 
-        stack: error.stack, 
-        userId: req.user.userId 
+      logger.error('Create notification error', {
+        error: error.message,
+        stack: error.stack,
+        userId: req.user.userId
       });
       res.status(500).json({ error: 'Failed to create notification' });
     }
@@ -277,10 +277,10 @@ const updateFCMToken = [
       logger.info('FCM token updated', { userId });
       res.json({ message: 'FCM token updated successfully' });
     } catch (error) {
-      logger.error('Update FCM token error', { 
-        error: error.message, 
-        stack: error.stack, 
-        userId: req.user.userId 
+      logger.error('Update FCM token error', {
+        error: error.message,
+        stack: error.stack,
+        userId: req.user.userId
       });
       res.status(500).json({ error: 'Failed to update FCM token' });
     }
@@ -305,7 +305,7 @@ const updateNotificationPreferences = [
 
       const user = await User.findByIdAndUpdate(
         userId,
-        { 
+        {
           $set: {
             'notificationPreferences.harvestReminders': preferences.harvestReminders,
             'notificationPreferences.dailyUpdates': preferences.dailyUpdates,
@@ -320,15 +320,15 @@ const updateNotificationPreferences = [
       }
 
       logger.info('Notification preferences updated', { userId, preferences });
-      res.json({ 
+      res.json({
         message: 'Notification preferences updated successfully',
         preferences: user.notificationPreferences
       });
     } catch (error) {
-      logger.error('Update notification preferences error', { 
-        error: error.message, 
-        stack: error.stack, 
-        userId: req.user.userId 
+      logger.error('Update notification preferences error', {
+        error: error.message,
+        stack: error.stack,
+        userId: req.user.userId
       });
       res.status(500).json({ error: 'Failed to update notification preferences' });
     }
@@ -350,18 +350,18 @@ const sendHarvestReminder = [
       const userId = req.user.userId;
 
       const results = await notificationService.sendHarvestReminder(cropId, userId);
-      
+
       logger.info('Harvest reminder sent', { cropId, userId, results });
-      res.json({ 
+      res.json({
         message: 'Harvest reminder sent successfully',
         results
       });
     } catch (error) {
-      logger.error('Send harvest reminder error', { 
-        error: error.message, 
-        stack: error.stack, 
+      logger.error('Send harvest reminder error', {
+        error: error.message,
+        stack: error.stack,
         cropId: req.params.cropId,
-        userId: req.user.userId 
+        userId: req.user.userId
       });
       res.status(500).json({ error: 'Failed to send harvest reminder' });
     }
@@ -383,17 +383,17 @@ const sendTestNotification = [
       const userId = req.user.userId;
 
       const result = await notificationService.sendTestNotification(userId, type);
-      
+
       logger.info('Test notification sent', { userId, type, result });
-      res.json({ 
+      res.json({
         message: 'Test notification sent successfully',
         result
       });
     } catch (error) {
-      logger.error('Send test notification error', { 
-        error: error.message, 
-        stack: error.stack, 
-        userId: req.user.userId 
+      logger.error('Send test notification error', {
+        error: error.message,
+        stack: error.stack,
+        userId: req.user.userId
       });
       res.status(500).json({ error: error.message });
     }
@@ -412,10 +412,10 @@ const getNotificationPreferences = async (req, res) => {
 
     res.json({ preferences: user.notificationPreferences });
   } catch (error) {
-    logger.error('Get notification preferences error', { 
-      error: error.message, 
-      stack: error.stack, 
-      userId: req.user.userId 
+    logger.error('Get notification preferences error', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user.userId
     });
     res.status(500).json({ error: 'Failed to get notification preferences' });
   }
