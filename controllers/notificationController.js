@@ -47,6 +47,8 @@ const getNotifications = [
       const total = await Notification.countDocuments(filter);
       const unreadCount = await Notification.getUnreadCount(userId);
 
+
+          // const userObjectId = new mongoose.Types.ObjectId(userId);
       // Get counts by category for stats
       const categoryStats = await Notification.aggregate([
         {   $match: { userId: new mongoose.Types.ObjectId(userId) } },
